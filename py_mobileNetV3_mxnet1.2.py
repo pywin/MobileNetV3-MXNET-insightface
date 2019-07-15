@@ -1,8 +1,8 @@
 #-*- coding:utf-8 -*-
 import mxnet as mx
 from mxnet.gluon import nn
-# import symbol_utils
-# from config import config
+import symbol_utils
+from config import config
 
 class HardSwish(nn.HybridBlock):
     def __init__(self, prefix=None, params=None):
@@ -75,8 +75,8 @@ model_setting = {
         [3,  16,  16, False, 're', 1, False],
         [3,  64,  24, False, 're', 2, False],
         [3,  72,  24, False, 're', 1,  True],
-        [3,  72,  40, True,  're', 2,  True],
-        [3, 120,  40, True,  're', 1, False],
+        [3,  72,  40, True,  're', 2,  False],
+        [3, 120,  40, True,  're', 1, True],
         [3, 120,  40, True,  're', 1,  True],
         [3, 240,  80, False, 'hs', 2, False],
         [3, 200,  80, False, 'hs', 1,  True],
@@ -112,6 +112,9 @@ class MobileNetV3(nn.HybridBlock):
 
         with self.name_scope():
             self.first = nn.HybridSequential()
+            #add conv1 according to paper
+            self.first.add(nn.Conv2D(channels=16, kernel_size=3, strides=1,
+                                     padding=1,use_bias=False))
             self.first.add(nn.Conv2D(channels=16, kernel_size=3, strides=2,
                                      padding=1, use_bias=False))
             self.first.add(nn.BatchNorm())
@@ -150,7 +153,7 @@ class MobileNetV3(nn.HybridBlock):
                 self.last.add(nn.Conv2D(1280, kernel_size=1, strides=1, use_bias=False))
                 self.last.add(HardSwish())
                 self.last.add(nn.Conv2D(self.num_classes, kernel_size=1))
-            # self.last.add(nn.Flatten())
+            self.last.add(nn.Flatten())
 
     def hybrid_forward(self, F, x, *args, **kwargs):
         x   = self.first(x)
@@ -159,23 +162,15 @@ class MobileNetV3(nn.HybridBlock):
         return out
 
 def get_symbol():
-    # num_classes = config.emb_size
-    # fc_type = config.net_output
-    # mode = 'large'
-    # data = mx.sym.Variable(name='data')
-    # data = data-127.5
-    # data = data * 0.0078125
-    # net = MobileNetV3(num_classes=num_classes,mode=mode)
+    num_classes = config.emb_size
+    fc_type = config.net_output
+    mode = 'large'
+    data = mx.sym.Variable(name='data')
+    data = data-127.5
+    data = data * 0.0078125
+    net = MobileNetV3(num_classes=num_classes,mode=mode)
     # net.initialize()
     # net.hybridize()
-    # body = net(data)
-    # fc1 = symbol_utils.get_fc1(body, num_classes, fc_type)
-    # return fc1
-    num_classes = 1000
-    mode = 'large'
-    net = MobileNetV3(mode=mode,num_classes=num_classes)
-    net.initialize()
-    net.hybridize()
-    data = mx.nd.random.randn(1, 3, 224, 224)
-    y = net(data).asnumpy()
-    print(y.shape)
+    body = net(data)
+    fc1 = symbol_utils.get_fc1(body, num_classes, fc_type)
+    return fc1
