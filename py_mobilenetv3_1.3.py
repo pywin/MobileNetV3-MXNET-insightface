@@ -154,7 +154,7 @@ class MobileNetV3(nn.HybridBlock):
                 self.last.add(nn.Conv2D(960, kernel_size=1, strides=1, use_bias=False))
                 self.last.add(nn.BatchNorm())
                 self.last.add(HardSwish())
-                self.last.add(nn.GlobalAvgPool2D())
+                #self.last.add(nn.GlobalAvgPool2D())
                 self.last.add(nn.Conv2D(1280, kernel_size=1, strides=1, use_bias=False))
                 self.last.add(HardSwish())
                 self.last.add(nn.Conv2D(self.num_classes, kernel_size=1))
@@ -175,8 +175,6 @@ def get_symbol():
     data = data-127.5
     data = data * 0.0078125
     net = MobileNetV3(num_classes=num_classes,mode=mode)
-    # net.initialize()
-    # net.hybridize()
     body = net(data)
-    fc1 = symbol_utils.get_fc1(body, num_classes, fc_type)
-    return fc1
+    body = symbol_utils.get_fc1(body, num_classes, fc_type)
+    return body
