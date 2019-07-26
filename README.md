@@ -23,3 +23,12 @@ Solve the problem of model oversize
 cd ../insightface/deploy/
 
 python -u model-slim.py --model your_savemodel_dir/,epoch
+
+Reference
+---------
+
+https://github.com/deepinsight/insightface
+
+https://github.com/AmigoCDT/MXNet-MobileNetV3
+
+https://github.com/wsqshiqing/MobileNetV3
