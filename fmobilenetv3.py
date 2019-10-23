@@ -66,7 +66,7 @@ class SEBlock(nn.HybridBlock):
         y = F.contrib.AdaptiveAvgPooling2D(data=x, output_size=(1, 1))
         y = self.excitation(y)
         y = F.expand_dims(F.expand_dims(y, axis=2), axis=3)
-        z = F.broadcast_plus(x, y)
+        z = F.broadcast_mul(x, y)
         return z
 
 
